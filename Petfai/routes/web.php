@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SalesController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -11,9 +12,9 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'role:manager,admin'])->name('dashboard');
 
-Route::get('/sales', function () {
-    return view('sales.index');
-})->middleware(['auth', 'verified', 'role:sales,manager,admin'])->name('sales.index');
+Route::get('/sales', [SalesController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
+    ->name('sales.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
