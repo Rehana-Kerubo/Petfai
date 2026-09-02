@@ -9,7 +9,11 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'role:manager,admin'])->name('dashboard');
+
+Route::get('/sales', function () {
+    return view('sales.index');
+})->middleware(['auth', 'verified', 'role:sales,manager,admin'])->name('sales.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
