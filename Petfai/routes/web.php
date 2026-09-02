@@ -35,6 +35,10 @@ Route::post('/sales/checkout', [SalesController::class, 'checkout'])
     ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
     ->name('sales.checkout');
 
+Route::get('/sales/receipt/{sale}', [SalesController::class, 'receipt'])
+    ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
+    ->name('sales.receipt');
+
 // dashboard for manager and admin
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:manager,admin'])

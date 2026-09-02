@@ -83,7 +83,7 @@ public function checkout(Request $request)
 
     $paymentMethod = $request->input('payment_method', 'cash');
 
-    DB::transaction(function () use ($cart, $paymentMethod) {
+    $sale = DB::transaction(function () use ($cart, $paymentMethod) {
         $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
         $sale = Sale::create([
@@ -109,10 +109,17 @@ public function checkout(Request $request)
 
             $product->decrement('stock_quantity', $item['quantity']);
         }
+        return $sale;
     });
 
     session()->forget('cart');
 
-    return redirect()->route('sales.index')->with('success', 'Sale completed!');
+    return redirect()->route('sales.receipt', $sale->id);
+}
+
+public function receipt(Sale $sale)
+{
+    $sale->load('items.product', 'cashier');
+    return view('sales.receipt', compact('sale'));
 }
 }
