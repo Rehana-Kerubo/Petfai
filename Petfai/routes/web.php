@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,5 +54,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// user management for manager and admin
+Route::get('/users', [UserController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('users.index');
+
+Route::post('/users', [UserController::class, 'store'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('users.store');
+
+Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('users.toggleActive');
 
 require __DIR__.'/auth.php';

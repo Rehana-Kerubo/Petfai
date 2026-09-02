@@ -51,4 +51,7 @@
             <a href="{{ route('products.index') }}" class="text-blue-600 underline">Manage Stock →</a>
         </div>
     </div>
+    @if (auth()->user()->role === 'admin')
+    <a href="{{ route('users.index') }}" class="text-blue-600 underline ml-4">Manage Users →</a>
+@endif
 </x-app-layout>
