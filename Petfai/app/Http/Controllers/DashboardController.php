@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -56,4 +57,24 @@ class DashboardController extends Controller
             'last7Days' => $last7Days,
         ]);
     }
+
+    public function salesLog(Request $request): View
+{
+    $date = $request->input('date', now()->toDateString());
+
+    $sales = Sale::with('cashier', 'items.product')
+        ->whereDate('created_at', $date)
+        ->orderByDesc('created_at')
+        ->get();
+
+    $cashTotal = $sales->where('payment_method', 'cash')->sum('total');
+    $mpesaTotal = $sales->where('payment_method', 'mpesa')->sum('total');
+
+    return view('dashboard.sales-log', [
+        'sales' => $sales,
+        'date' => $date,
+        'cashTotal' => $cashTotal,
+        'mpesaTotal' => $mpesaTotal,
+    ]);
+}
 }

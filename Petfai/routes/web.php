@@ -44,6 +44,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:manager,admin'])
     ->name('dashboard');
 
+Route::get('/sales-log', [DashboardController::class, 'salesLog'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('dashboard.sales.log');
+
 // product management for manager and admin
 Route::get('/products', [ProductController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:manager,admin'])

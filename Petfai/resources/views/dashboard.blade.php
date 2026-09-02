@@ -3,14 +3,15 @@
         <div class="max-w-6xl mx-auto px-6 space-y-6">
 
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <div class="flex gap-3">
-                    <a href="{{ route('products.index') }}" class="bg-pink-600 text-black px-4 py-2 rounded-lg text-sm hover:bg-pink-700">Manage Stock</a>
-                    @if (auth()->user()->role === 'admin')
-                        <a href="{{ route('users.index') }}" class="bg-gray-700 text-black px-4 py-2 rounded-lg text-sm hover:bg-gray-800">Manage Users</a>
-                    @endif
-                </div>
-            </div>
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <div class="flex gap-3">
+        <a href="{{ route('products.index') }}" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-pink-700">Manage Stock</a>
+        <a href="{{ route('dashboard.sales.log') }}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200">Sales Log</a>
+        @if (auth()->user()->role === 'admin')
+            <a href="{{ route('users.index') }}" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800">Manage Users</a>
+        @endif
+    </div>
+</div>
 
             @if (session('success'))
                 <div class="bg-green-100 text-green-800 px-4 py-3 rounded">{{ session('success') }}</div>
