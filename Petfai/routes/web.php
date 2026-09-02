@@ -16,6 +16,18 @@ Route::get('/sales', [SalesController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
     ->name('sales.index');
 
+Route::post('/sales/cart/add/{product}', [SalesController::class, 'addToCart'])
+    ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
+    ->name('cart.add');
+
+Route::post('/sales/cart/remove/{product}', [SalesController::class, 'removeFromCart'])
+    ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
+    ->name('cart.remove');
+
+Route::post('/sales/cart/update/{product}', [SalesController::class, 'updateCartQuantity'])
+    ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
+    ->name('cart.update');
+     
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
