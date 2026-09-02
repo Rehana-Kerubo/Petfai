@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -12,6 +14,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'role:manager,admin'])->name('dashboard');
 
+// sales agent
 Route::get('/sales', [SalesController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
     ->name('sales.index');
@@ -30,7 +33,21 @@ Route::post('/sales/cart/update/{product}', [SalesController::class, 'updateCart
 Route::post('/sales/checkout', [SalesController::class, 'checkout'])
     ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
     ->name('sales.checkout');
-    
+
+// dashboard for manager and admin
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('dashboard');
+
+// product management for manager and admin
+Route::get('/products', [ProductController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('products.index');
+
+Route::patch('/products/{product}', [ProductController::class, 'update'])
+    ->middleware(['auth', 'verified', 'role:manager,admin'])
+    ->name('products.update');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
