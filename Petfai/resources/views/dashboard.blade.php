@@ -1,57 +1,117 @@
 <x-app-layout>
-    <div class="p-6 max-w-6xl mx-auto">
-        <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+    <div class="py-12">
+        <div class="max-w-6xl mx-auto px-6 space-y-6">
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="border rounded p-4">
-                <p class="text-sm text-gray-500">Today's Revenue</p>
-                <p class="text-xl font-bold">KES {{ number_format($todayRevenue, 2) }}</p>
-            </div>
-            <div class="border rounded p-4">
-                <p class="text-sm text-gray-500">Today's Profit</p>
-                <p class="text-xl font-bold text-green-600">KES {{ number_format($todayProfit, 2) }}</p>
-            </div>
-            <div class="border rounded p-4">
-                <p class="text-sm text-gray-500">Week's Revenue</p>
-                <p class="text-xl font-bold">KES {{ number_format($weekRevenue, 2) }}</p>
-            </div>
-            <div class="border rounded p-4">
-                <p class="text-sm text-gray-500">Week's Profit</p>
-                <p class="text-xl font-bold text-green-600">KES {{ number_format($weekProfit, 2) }}</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h2 class="text-lg font-bold mb-3">Top Selling Products</h2>
-                @forelse ($topProducts as $item)
-                    <div class="flex justify-between border-b py-2">
-                        <span>{{ $item->product->name ?? 'Unknown' }}</span>
-                        <span class="font-semibold">{{ $item->total_quantity }} sold</span>
-                    </div>
-                @empty
-                    <p class="text-gray-500">No sales yet</p>
-                @endforelse
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                <div class="flex gap-3">
+                    <a href="{{ route('products.index') }}" class="bg-pink-600 text-black px-4 py-2 rounded-lg text-sm hover:bg-pink-700">Manage Stock</a>
+                    @if (auth()->user()->role === 'admin')
+                        <a href="{{ route('users.index') }}" class="bg-gray-700 text-black px-4 py-2 rounded-lg text-sm hover:bg-gray-800">Manage Users</a>
+                    @endif
+                </div>
             </div>
 
-            <div>
-                <h2 class="text-lg font-bold mb-3">Low Stock Alerts</h2>
-                @forelse ($lowStockProducts as $product)
-                    <div class="flex justify-between border-b py-2 text-red-600">
-                        <span>{{ $product->name }}</span>
-                        <span class="font-semibold">{{ $product->stock_quantity }} left</span>
-                    </div>
-                @empty
-                    <p class="text-gray-500">All stock levels healthy</p>
-                @endforelse
-            </div>
-        </div>
+            @if (session('success'))
+                <div class="bg-green-100 text-green-800 px-4 py-3 rounded">{{ session('success') }}</div>
+            @endif
 
-        <div class="mt-8">
-            <a href="{{ route('products.index') }}" class="text-blue-600 underline">Manage Stock →</a>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 32rem;">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">Today's Revenue</p>
+                    <p class="text-2xl font-bold text-gray-900">KSh {{ number_format($todayRevenue, 2) }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">Today's Profit</p>
+                    <p class="text-2xl font-bold text-pink-600">KSh {{ number_format($todayProfit, 2) }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">This Week's Revenue</p>
+                    <p class="text-2xl font-bold text-gray-900">KSh {{ number_format($weekRevenue, 2) }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">This Week's Profit</p>
+                    <p class="text-2xl font-bold text-pink-600">KSh {{ number_format($weekProfit, 2) }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="font-semibold text-gray-800 mb-4">Revenue — Last 7 Days</h3>
+                <canvas id="salesChart" height="80"></canvas>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Top 5 Selling Products</h3>
+                    @if($topProducts->isEmpty())
+                        <p class="text-gray-500 text-sm">No sales data yet.</p>
+                    @else
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-gray-500 border-b">
+                                    <th class="py-2">Product</th>
+                                    <th class="py-2 text-right">Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($topProducts as $item)
+                                    <tr class="border-b last:border-0">
+                                        <td class="py-2">{{ $item->product->name ?? 'Unknown' }}</td>
+                                        <td class="py-2 text-right">{{ $item->total_quantity }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Low Stock Products</h3>
+                    @if($lowStockProducts->isEmpty())
+                        <p class="text-gray-500 text-sm">All products are well stocked.</p>
+                    @else
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-gray-500 border-b">
+                                    <th class="py-2">Product</th>
+                                    <th class="py-2 text-right">Stock</th>
+                                    <th class="py-2 text-right">Threshold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($lowStockProducts as $product)
+                                    <tr class="border-b last:border-0">
+                                        <td class="py-2">{{ $product->name }}</td>
+                                        <td class="py-2 text-right text-red-600 font-semibold">{{ $product->stock_quantity }}</td>
+                                        <td class="py-2 text-right">{{ $product->low_stock_threshold }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
-    @if (auth()->user()->role === 'admin')
-    <a href="{{ route('users.index') }}" class="text-blue-600 underline ml-4">Manage Users →</a>
-@endif
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('salesChart');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($last7Days->pluck('label')) !!},
+                datasets: [{
+                    label: 'Revenue (KES)',
+                    data: {!! json_encode($last7Days->pluck('total')) !!},
+                    backgroundColor: '#db2777',
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
 </x-app-layout>

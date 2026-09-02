@@ -33,6 +33,19 @@ class DashboardController extends Controller
 
         $lowStockProducts = Product::whereColumn('stock_quantity', '<=', 'low_stock_threshold')->get();
 
+        $last7Days = collect(range(6, 0))->map(function ($daysAgo) {
+    $date = now()->subDays($daysAgo);
+    $dayTotal = SaleItem::whereHas('sale', fn($q) =>
+            $q->whereDate('created_at', $date->toDateString())
+        )
+        ->sum(DB::raw('quantity * price_at_sale'));
+
+    return [
+        'label' => $date->format('D'),
+        'total' => (float) $dayTotal,
+    ];
+});
+
         return view('dashboard', [
             'todayRevenue' => $todayRevenue,
             'todayProfit' => $todayProfit,
@@ -40,6 +53,7 @@ class DashboardController extends Controller
             'weekProfit' => $weekProfit,
             'topProducts' => $topProducts,
             'lowStockProducts' => $lowStockProducts,
+            'last7Days' => $last7Days,
         ]);
     }
 }
