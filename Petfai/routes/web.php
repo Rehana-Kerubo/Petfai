@@ -26,8 +26,11 @@ Route::post('/sales/cart/remove/{product}', [SalesController::class, 'removeFrom
 
 Route::post('/sales/cart/update/{product}', [SalesController::class, 'updateCartQuantity'])
     ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
-    ->name('cart.update');
-     
+    ->name('cart.update');     
+Route::post('/sales/checkout', [SalesController::class, 'checkout'])
+    ->middleware(['auth', 'verified', 'role:sales,manager,admin'])
+    ->name('sales.checkout');
+    
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

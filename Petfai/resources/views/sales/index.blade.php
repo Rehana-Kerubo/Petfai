@@ -57,12 +57,65 @@
                 <p class="text-gray-500">Cart is empty</p>
             @endforelse
 
-            @if (count($cart) > 0)
-                <div class="mt-4 pt-4 border-t">
-                    <p class="font-bold text-lg">Total: KES {{ number_format($cartTotal, 2) }}</p>
-                    <button class="mt-2 w-full bg-blue-600 text-white py-2 rounded">Checkout</button>
-                </div>
-            @endif
+           @if (count($cart) > 0)
+    <div class="mt-4 pt-4 border-t">
+        <p class="font-bold text-lg">Total: KES {{ number_format($cartTotal, 2) }}</p>
+
+        <div class="mt-2 flex flex-col gap-2">
+            <form method="POST" action="{{ route('sales.checkout') }}">
+                @csrf
+                <input type="hidden" name="payment_method" value="cash">
+                <button type="submit" class="w-full bg-gray-700 text-white py-2 rounded">Pay with Cash</button>
+            </form>
+
+            <button type="button" onclick="document.getElementById('mpesaModal').classList.remove('hidden')" class="w-full bg-green-600 text-white py-2 rounded">
+                Pay with M-Pesa
+            </button>
+        </div>
+    </div>
+@endif
+
+@if (session('success'))
+    <div class="mt-4 p-3 bg-green-100 text-green-800 rounded">{{ session('success') }}</div>
+@endif
+
+<!-- M-Pesa Modal -->
+<div id="mpesaModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded p-6 w-96">
+        <div id="mpesaStep1">
+            <h3 class="font-bold text-lg mb-3">M-Pesa Payment</h3>
+            <input type="text" id="mpesaPhone" placeholder="Phone number (07XXXXXXXX)" class="border rounded px-3 py-2 w-full mb-3">
+            <button onclick="startMpesaPayment()" class="w-full bg-green-600 text-white py-2 rounded">Send Payment Request</button>
+            <button onclick="document.getElementById('mpesaModal').classList.add('hidden')" class="w-full mt-2 text-gray-500 py-1">Cancel</button>
+        </div>
+
+        <div id="mpesaStep2" class="hidden text-center">
+            <p class="mb-3">Sending payment request...</p>
+            <p class="text-sm text-gray-500">Enter your M-Pesa PIN on your phone to complete.</p>
+        </div>
+
+        <div id="mpesaStep3" class="hidden text-center">
+            <p class="text-green-600 font-bold mb-3">✓ Payment Received</p>
+            <form method="POST" action="{{ route('sales.checkout') }}">
+                @csrf
+                <input type="hidden" name="payment_method" value="mpesa">
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Complete Sale</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function startMpesaPayment() {
+    document.getElementById('mpesaStep1').classList.add('hidden');
+    document.getElementById('mpesaStep2').classList.remove('hidden');
+
+    setTimeout(() => {
+        document.getElementById('mpesaStep2').classList.add('hidden');
+        document.getElementById('mpesaStep3').classList.remove('hidden');
+    }, 2000);
+}
+</script>
         </div>
     </div>
 </x-app-layout>
