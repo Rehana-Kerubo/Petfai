@@ -9,11 +9,21 @@ use Illuminate\Http\RedirectResponse;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $products = Product::orderBy('name')->get();
+        $query = $request->input('search');
+        $products = Product::orderBy('name')
+            ->when($query, function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('category', 'like', "%{$query}%");
+            })
+            ->orderBy('name')
+            ->get();
 
-        return view('products.index', ['products' => $products]);
+        return view('products.index', [
+            'products' => $products,
+            'search' => $query,
+        ]);
     }
 
     public function update(Request $request, Product $product): RedirectResponse
