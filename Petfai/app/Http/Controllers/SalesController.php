@@ -83,14 +83,19 @@ public function checkout(Request $request)
 
     $paymentMethod = $request->input('payment_method', 'cash');
 
-    $sale = DB::transaction(function () use ($cart, $paymentMethod) {
+    $sale = DB::transaction(function () use ($cart, $paymentMethod, $request) {
         $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
-        $sale = Sale::create([
-            'cashier_id' => auth()->id(),
-            'total' => $total,
-            'payment_method' => $paymentMethod,
-        ]);
+       $amountGiven = $paymentMethod === 'cash' ? $request->input('amount_given') : null;
+        $balance = $amountGiven !== null ? $amountGiven - $total : null;
+
+    $sale = Sale::create([
+        'cashier_id' => auth()->id(),
+        'total' => $total,
+        'payment_method' => $paymentMethod,
+        'amount_given' => $amountGiven,
+        'balance' => $balance,
+    ]);
 
         foreach ($cart as $productId => $item) {
             $product = Product::findOrFail($productId);

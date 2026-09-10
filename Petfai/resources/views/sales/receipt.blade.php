@@ -34,6 +34,10 @@
                 </div>
 
                 <p class="text-xs text-gray-500 mt-2">Payment: {{ ucfirst($sale->payment_method) }}</p>
+                @if ($sale->payment_method === 'cash' && $sale->amount_given)
+                    <p class="text-xs text-gray-500">Amount Given: KSh {{ number_format($sale->amount_given, 2) }}</p>
+                    <p class="text-xs text-gray-500">Balance: KSh {{ number_format($sale->balance, 2) }}</p>
+                @endif
                 <p class="text-xs text-gray-500">Served by: {{ $sale->cashier->name ?? 'N/A' }}</p>
 
                 <p class="text-center text-xs text-gray-400 mt-4">Thank you for shopping with us!</p>
