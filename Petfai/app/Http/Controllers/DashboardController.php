@@ -69,6 +69,7 @@ class DashboardController extends Controller
 
     $cashTotal = $sales->where('payment_method', 'cash')->sum('total');
     $mpesaTotal = $sales->where('payment_method', 'mpesa')->sum('total');
+    $itemsSold = $sales->flatMap(fn($sale) => $sale->items)->sum('quantity');
 
     return view('dashboard.sales-log', [
         'sales' => $sales,
